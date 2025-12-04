@@ -110,3 +110,84 @@ plt.ylabel("Precision")
 plt.title("PR Curve — SMOTE + RF")
 plt.grid()
 plt.show()
+
+from xgboost import XGBClassifier
+
+xgb = XGBClassifier(
+    n_estimators=300,
+    max_depth=4,
+    learning_rate=0.1,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    scale_pos_weight=(len(y_train) / sum(y_train)),  # important for imbalance
+    eval_metric="logloss",
+    n_jobs=-1,
+)
+
+xgb.fit(X_train, y_train)
+
+y_proba_xgb = xgb.predict_proba(X_test)[:, 1]
+y_pred_xgb = (y_proba_xgb >= 0.5).astype(int)
+
+print("\n=== XGBOOST RESULTS ===")
+print("PR-AUC:", average_precision_score(y_test, y_proba_xgb))
+print(classification_report(y_test, y_pred_xgb))
+
+
+from lightgbm import LGBMClassifier
+
+lgbm = LGBMClassifier(
+    n_estimators=300,
+    learning_rate=0.1,
+    max_depth=-1,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    class_weight="balanced",
+)
+
+lgbm.fit(X_train, y_train)
+
+y_proba_lgb = lgbm.predict_proba(X_test)[:, 1]
+y_pred_lgb = (y_proba_lgb >= 0.5).astype(int)
+
+print("\n=== LIGHTGBM RESULTS ===")
+print("PR-AUC:", average_precision_score(y_test, y_proba_lgb))
+print(classification_report(y_test, y_pred_lgb))
+
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "model__n_estimators": [200, 400],
+    "model__max_depth": [None, 10, 20],
+    "model__min_samples_split": [2, 5],
+}
+
+grid = GridSearchCV(
+    estimator=smote_rf,
+    param_grid=param_grid,
+    scoring="average_precision",
+    cv=3,
+    n_jobs=-1,
+)
+
+grid.fit(X_train, y_train)
+
+print("\n=== BEST GRIDSEARCH MODEL ===")
+print("Best Params:", grid.best_params_)
+print("Best PR-AUC:", grid.best_score_)
+
+import numpy as np
+
+rf_model = smote_rf.named_steps["model"]
+importances = rf_model.feature_importances_
+
+for i, imp in enumerate(importances):
+    print(f"Feature f{i}: {imp:.4f}")
+
+import shap
+
+explainer = shap.TreeExplainer(rf_model)
+shap_values = explainer.shap_values(X_test)
+
+# Summary plot (feature importance)
+shap.summary_plot(shap_values[1], X_test)
