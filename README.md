@@ -9,6 +9,7 @@ This project demonstrates the correct workflow for handling imbalance, evaluatin
 
 ```
 credit-card-ml/
+│── .gitignore
 │── main.py
 │── requirements.txt
 │── pr_curve.png
