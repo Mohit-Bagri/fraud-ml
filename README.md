@@ -111,17 +111,3 @@ Boosted models (XGBoost, LightGBM) typically perform best.
 
 ---
 
-## ✅ Recommended Requirements File
-
-```
-pandas
-numpy==1.26.4
-scikit-learn
-imbalanced-learn
-matplotlib
-xgboost
-lightgbm
-shap
-```
-
----
