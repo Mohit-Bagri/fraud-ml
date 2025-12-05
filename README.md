@@ -50,6 +50,18 @@ These models are evaluated using **PR-AUC**, the most reliable metric for rare-e
 
 ---
 
+## 📈 PR Curve (SMOTE + RandomForest)
+
+![PR Curve](pr_curve.png)
+
+---
+
+## 🔍 SHAP Summary Plot (Feature Importance)
+
+![SHAP Summary](shap_summary.png)
+
+---
+
 ## ▶️ How to Run
 
 Install dependencies:
